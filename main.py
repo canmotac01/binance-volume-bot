@@ -7,9 +7,9 @@ from email.mime.text import MIMEText
 from keep_alive import keep_alive
 
 # Email cấu hình
-from_email = 'your_gmail@gmail.com'
-to_email = 'your_email@gmail.com'
-email_password = 'your_app_password'
+from_email = 'canmotac01@gmail.com'
+to_email = 'hieutrading2025@gmail.com'
+email_password = 'hmac clta hbjl yizr'
 
 def send_email(subject, content):
     msg = MIMEText(content)
