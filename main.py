@@ -57,7 +57,7 @@ def scan_binance_futures():
         print("⛔ No spikes found.")
 
 # Run every 30 minutes
-schedule.every(30).minutes.do(scan_binance_futures)
+schedule.every(15).minutes.do(scan_binance_futures)
 
 keep_alive()
 
