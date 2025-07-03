@@ -21,14 +21,19 @@ def send_email(subject, content):
         server.login(from_email, email_password)
         server.send_message(msg)
         server.quit()
-        print("✅ Email sent")
+        print("✅ Email sent:", subject)
     except Exception as e:
         print("❌ Email error:", e)
 
 def scan_binance_futures():
     print("🔍 Scanning volume...")
     binance = ccxt.binance({'options': {'defaultType': 'future'}})
-    markets = binance.load_markets()
+    try:
+        markets = binance.load_markets()
+    except Exception as e:
+        print("❌ Lỗi load markets:", e)
+        return
+
     symbols = [s for s in markets if s.endswith('/USDT') and markets[s]['type'] == 'future']
 
     length = 20
@@ -43,9 +48,11 @@ def scan_binance_futures():
             df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
             avg_vol = df['volume'][:-1].mean()
             last_vol = df['volume'].iloc[-1]
+            print(f"🔎 {symbol}: Last Vol = {last_vol:.2f}, Avg Vol = {avg_vol:.2f}")
             if last_vol > avg_vol * multiplier and last_vol > min_volume:
                 spike_coins.append((symbol, last_vol, avg_vol))
-        except:
+        except Exception as e:
+            print(f"❌ Lỗi lấy dữ liệu {symbol}: {e}")
             continue
 
     if spike_coins:
@@ -56,11 +63,16 @@ def scan_binance_futures():
     else:
         print("⛔ No spikes found.")
 
-# Run every 30 minutes
-schedule.every(5).minutes.do(scan_binance_futures)
+# ⏰ Kiểm tra mỗi 30 phút
+schedule.every(1).minutes.do(scan_binance_futures)
 
+# 🌐 Giữ bot sống
 keep_alive()
 
+# 📧 Gửi email test khi khởi động
+send_email("🔔 Bot Started", "Bot volume đang chạy và sẵn sàng kiểm tra volume.")
+
+# ⏳ Vòng lặp chạy bot
 while True:
     schedule.run_pending()
     time.sleep(1)
