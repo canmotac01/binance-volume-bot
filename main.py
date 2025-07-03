@@ -37,8 +37,8 @@ def scan_binance_futures():
     symbols = [s for s in markets if s.endswith('/USDT') and markets[s]['type'] == 'future']
 
     length = 20
-    multiplier = 2
-    min_volume = 100000
+    multiplier = 1.2
+    min_volume = 10000
     limit = length + 1
     spike_coins = []
 
