@@ -34,7 +34,7 @@ def scan_binance_futures():
         print("❌ Lỗi load markets:", e)
         return
 
-    # Lọc danh sách coin USDT Futures PERPETUAL còn active
+    # Lọc coin Futures USDT PERPETUAL
     symbols = [
         s for s in markets
         if s.endswith('/USDT')
@@ -44,12 +44,13 @@ def scan_binance_futures():
     ]
 
     print(f"✅ Tổng số coin FUTURES USDT (PERPETUAL): {len(symbols)}")
-    print("🔽 Ví dụ 10 coin đầu:", symbols[:10])
-
-    # Cấu hình phát hiện volume spike
+    if not symbols:
+        print("⚠️ Không tìm thấy coin nào. Có thể Binance API bị lỗi.")
+    
+    # Phần kiểm tra volume spike
     length = 20
     multiplier = 1.2
-    min_volume = 1000
+    min_volume = 10000
     limit = length + 1
     spike_coins = []
 
@@ -67,21 +68,22 @@ def scan_binance_futures():
             continue
 
     # Soạn nội dung email
-    content = ""
+    content_lines = []
 
     if spike_coins:
-        content += "🔥 Volume Spike Detected:\n"
+        content_lines.append("🔥 Volume Spike Detected:")
         for coin in spike_coins:
-            content += f"{coin[0]} | Vol: {coin[1]:.2f} | Avg: {coin[2]:.2f}\n"
+            content_lines.append(f"{coin[0]} | Vol: {coin[1]:.2f} | Avg: {coin[2]:.2f}")
     else:
-        content += "⛔ No volume spike found.\n"
+        content_lines.append("⛔ No volume spike found.")
 
     # Danh sách coin hiện có
-    content += "\n📄 Danh sách coin FUTURES USDT (PERPETUAL):\n"
+    content_lines.append("\n📄 Danh sách coin FUTURES USDT (PERPETUAL):")
     for i, coin in enumerate(symbols, 1):
-        content += f"{i}. {coin}\n"
+        content_lines.append(f"{i}. {coin}")
 
-    # Gửi email
+    # Gộp lại và gửi
+    content = "\n".join(content_lines)
     send_email("🔔 Báo cáo Volume + Danh sách coin", content)
 
 # Chạy mỗi 30 phút
