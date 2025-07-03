@@ -48,8 +48,8 @@ def scan_binance_futures():
 
     # Phần còn lại giữ nguyên...
     length = 20
-    multiplier = 2
-    min_volume = 100000
+    multiplier = 1.1
+    min_volume = 1000
     limit = length + 1
     spike_coins = []
 
