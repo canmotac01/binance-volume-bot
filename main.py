@@ -6,7 +6,7 @@ import smtplib
 from email.mime.text import MIMEText
 from keep_alive import keep_alive
 
-# Email cấu hình
+# Cấu hình email
 from_email = 'canmotac01@gmail.com'
 to_email = 'hieutrading2025@gmail.com'
 email_password = 'hmac clta hbjl yizr'
@@ -34,7 +34,7 @@ def scan_binance_futures():
         print("❌ Lỗi load markets:", e)
         return
 
-    # ⚠️ Lọc đúng coin USDT-Futures PERPETUAL đang còn giao dịch
+    # Lọc danh sách coin USDT Futures PERPETUAL còn active
     symbols = [
         s for s in markets
         if s.endswith('/USDT')
@@ -46,9 +46,9 @@ def scan_binance_futures():
     print(f"✅ Tổng số coin FUTURES USDT (PERPETUAL): {len(symbols)}")
     print("🔽 Ví dụ 10 coin đầu:", symbols[:10])
 
-    # Phần còn lại giữ nguyên...
+    # Cấu hình phát hiện volume spike
     length = 20
-    multiplier = 1.1
+    multiplier = 1.2
     min_volume = 1000
     limit = length + 1
     spike_coins = []
@@ -66,24 +66,34 @@ def scan_binance_futures():
             print(f"❌ Lỗi lấy dữ liệu {symbol}: {e}")
             continue
 
+    # Soạn nội dung email
+    content = ""
+
     if spike_coins:
-        content = ""
+        content += "🔥 Volume Spike Detected:\n"
         for coin in spike_coins:
             content += f"{coin[0]} | Vol: {coin[1]:.2f} | Avg: {coin[2]:.2f}\n"
-        send_email("🔥 Volume Spike", content)
     else:
-        print("⛔ No spikes found.")
+        content += "⛔ No volume spike found.\n"
 
-# ⏰ Kiểm tra mỗi 30 phút
+    # Danh sách coin hiện có
+    content += "\n📄 Danh sách coin FUTURES USDT (PERPETUAL):\n"
+    for i, coin in enumerate(symbols, 1):
+        content += f"{i}. {coin}\n"
+
+    # Gửi email
+    send_email("🔔 Báo cáo Volume + Danh sách coin", content)
+
+# Chạy mỗi 30 phút
 schedule.every(1).minutes.do(scan_binance_futures)
 
-# 🌐 Giữ bot sống
+# Giữ bot sống
 keep_alive()
 
-# 📧 Gửi email test khi khởi động
+# Gửi mail test khi khởi động bot
 send_email("🔔 Bot Started", "Bot volume đang chạy và sẵn sàng kiểm tra volume.")
 
-# ⏳ Vòng lặp chạy bot
+# Vòng lặp chính
 while True:
     schedule.run_pending()
     time.sleep(1)
