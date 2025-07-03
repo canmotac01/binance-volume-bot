@@ -27,14 +27,13 @@ def fetch_binance_futures_symbols():
         binance = ccxt.binance({
             'enableRateLimit': True,
             'options': {
-                'defaultType': 'future'  # BẮT BUỘC để lấy Futures
+                'defaultType': 'future'
             }
         })
         markets = binance.load_markets()
         symbols = [
             s for s in markets
             if s.endswith('/USDT')
-            and markets[s].get('type') == 'future'
             and markets[s].get('active') == True
             and markets[s]['info'].get('contractType') == 'PERPETUAL'
         ]
