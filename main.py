@@ -23,8 +23,13 @@ def send_email(subject, content):
 
 def fetch_binance_futures_symbols():
     print("🔍 Fetching Futures USDT symbols from Binance...")
-    binance = ccxt.binance({'options': {'defaultType': 'future'}})
     try:
+        binance = ccxt.binance({
+            'enableRateLimit': True,
+            'options': {
+                'defaultType': 'future'  # BẮT BUỘC để lấy Futures
+            }
+        })
         markets = binance.load_markets()
         symbols = [
             s for s in markets
@@ -33,12 +38,13 @@ def fetch_binance_futures_symbols():
             and markets[s].get('active') == True
             and markets[s]['info'].get('contractType') == 'PERPETUAL'
         ]
+        print(f"✅ Lấy được {len(symbols)} coin Futures.")
         return symbols
     except Exception as e:
-        print("❌ Lỗi load markets:", e)
+        print("❌ Lỗi load markets:", type(e), str(e))
         return []
 
-# Chạy
+# Chạy thử
 symbols = fetch_binance_futures_symbols()
 
 if symbols:
