@@ -34,11 +34,22 @@ def scan_binance_futures():
         print("❌ Lỗi load markets:", e)
         return
 
-    symbols = [s for s in markets if s.endswith('/USDT') and markets[s]['type'] == 'future']
+    # ⚠️ Lọc đúng coin USDT-Futures PERPETUAL đang còn giao dịch
+    symbols = [
+        s for s in markets
+        if s.endswith('/USDT')
+        and markets[s].get('type') == 'future'
+        and markets[s].get('active') == True
+        and markets[s]['info'].get('contractType') == 'PERPETUAL'
+    ]
 
+    print(f"✅ Tổng số coin FUTURES USDT (PERPETUAL): {len(symbols)}")
+    print("🔽 Ví dụ 10 coin đầu:", symbols[:10])
+
+    # Phần còn lại giữ nguyên...
     length = 20
-    multiplier = 1.2
-    min_volume = 10000
+    multiplier = 2
+    min_volume = 100000
     limit = length + 1
     spike_coins = []
 
