@@ -69,23 +69,17 @@ def scan_and_report():
             print(f"⚠️ Error with {symbol}: {e}")
             continue
 
-    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-    content = f"🕒 Thời gian: {now}\n"
-    content += f"\n📌 Danh sách coin đang active trên Binance Futures ({len(symbols)}):\n"
-    content += ', '.join(symbols)
-
-    content += "\n\n🔥 Coin có volume tăng đột biến (30m):\n"
     if spike_coins:
+        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        content = f"🕒 Thời gian: {now}\n\n🔥 Coin có volume tăng đột biến (30m):\n"
         for coin in spike_coins:
             content += f"{coin[0]} | Vol: {coin[1]:,.2f} | Avg: {coin[2]:,.2f}\n"
+        send_email("🔥 Volume Spike Alert (30m)", content)
     else:
-        content += "⛔ Không có coin nào spike trong 30 phút gần nhất.\n"
-
-    send_email("📈 Báo cáo volume Binance Futures (30p)", content)
+        print("⛔ Không có coin nào spike. Không gửi email.")
 
 # Chạy mỗi 10 phút
-schedule.every(1).minutes.do(scan_and_report)
+schedule.every(10).minutes.do(scan_and_report)
 
 keep_alive()
 
