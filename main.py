@@ -64,7 +64,8 @@ def scan_and_report():
             avg_vol = df['volume'][:-1].mean()
             last_vol = df['volume'].iloc[-1]
             if last_vol > avg_vol * multiplier and last_vol > min_volume:
-                spike_coins.append((symbol, last_vol, avg_vol))
+                increase_pct = (last_vol / avg_vol - 1) * 100
+                spike_coins.append((symbol, increase_pct))
         except Exception as e:
             print(f"⚠️ Error with {symbol}: {e}")
             continue
@@ -73,7 +74,7 @@ def scan_and_report():
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         content = f"🕒 Thời gian: {now}\n\n🔥 Coin có volume tăng đột biến (30m):\n"
         for coin in spike_coins:
-            content += f"{coin[0]} | Vol: {coin[1]:,.2f} | Avg: {coin[2]:,.2f}\n"
+            content += f"{coin[0]} | Tăng {coin[1]:.0f}%\n"
         send_email("🔥 Volume Spike Alert (30m)", content)
     else:
         print("⛔ Không có coin nào spike. Không gửi email.")
