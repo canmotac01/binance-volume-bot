@@ -5,6 +5,7 @@ import schedule
 import smtplib
 from email.mime.text import MIMEText
 from keep_alive import keep_alive
+from datetime import datetime
 
 # Email cấu hình
 from_email = 'canmotac01@gmail.com'
@@ -48,7 +49,7 @@ def fetch_klines(symbol, interval='30m', limit=20):
     df['volume'] = df['volume'].astype(float)
     return df
 
-def scan_volume_spike():
+def scan_and_report():
     print("🔍 Scanning volume...")
     symbols = get_active_futures_symbols()
 
@@ -68,16 +69,23 @@ def scan_volume_spike():
             print(f"⚠️ Error with {symbol}: {e}")
             continue
 
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    content = f"🕒 Thời gian: {now}\n"
+    content += f"\n📌 Danh sách coin đang active trên Binance Futures ({len(symbols)}):\n"
+    content += ', '.join(symbols)
+
+    content += "\n\n🔥 Coin có volume tăng đột biến (30m):\n"
     if spike_coins:
-        content = ""
         for coin in spike_coins:
             content += f"{coin[0]} | Vol: {coin[1]:,.2f} | Avg: {coin[2]:,.2f}\n"
-        send_email("🔥 Volume Spike (30m)", content)
     else:
-        print("⛔ No spikes found.")
+        content += "⛔ Không có coin nào spike trong 30 phút gần nhất.\n"
+
+    send_email("📈 Báo cáo volume Binance Futures (30p)", content)
 
 # Chạy mỗi 10 phút
-schedule.every(10).minutes.do(scan_volume_spike)
+schedule.every(1).minutes.do(scan_and_report)
 
 keep_alive()
 
